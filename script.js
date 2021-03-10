@@ -1,3 +1,4 @@
+const player = document.querySelector('.player');
 const video = document.querySelector('video');
 const progressRange = document.querySelector('.progress-range');
 const progressBar = document.querySelector('.progress-bar');
@@ -8,6 +9,7 @@ const volumeRange = document.querySelector('.volume-range');
 const currentTime = document.querySelector('.time-elapsed');
 const durationEl = document.querySelector('.time-duration');
 const fullscreenBtn = document.querySelector('.fullscreen');
+const speed = document.querySelector('.player-speed');
 var volumeLevel;
 
 // Play & Pause ----------------------------------- //
@@ -66,14 +68,28 @@ const setProgress = (e) => {
 
 
 // Volume Controls --------------------------- //
+const changeVolumeIcon = (volume) => {
+    volumeIcon.className = '';
+    if (volume > 0.4) {
+        volumeIcon.classList.add('fas', 'fa-volume-up');
+    } else if (volume > 0 && volume <= 0.4) {
+        volumeIcon.classList.add('fas', 'fa-volume-down');
+    } else if (volume === 0) {
+        volumeIcon.classList.add('fas', 'fa-volume-mute')
+    }
+ }
+
 function setVolume(e) {
-    video.volume = e.offsetX / volumeRange.clientWidth;
-    volumeLevel = video.volume;    
+    video.volume = e.offsetX / volumeRange.clientWidth;    
     video.volume < 0.1 ? video.volume = 0 : false;
     video.volume > 0.9 ? video.volume = 1 : false;
-    video.volume === 0 ? setMuteIcon() : volumeIcon.classList.replace('fa-volume-mute','fa-volume-up');
+    volumeLevel = video.volume;
+    // volume === 0 ? setMuteIcon() : volumeIcon.classList.replace('fa-volume-mute','fa-volume-up');
     volumeBar.style.width = `${video.volume * 100}%`;
-    console.log('volumelevel is', video.volume);
+    console.log('volumelevel is', volumeLevel);
+    changeVolumeIcon(video.volume);
+    // Change icons based on volume level
+
 }
 
 const setMuteIcon = () => {
@@ -83,12 +99,13 @@ const setMuteIcon = () => {
 
 const toggleMute = () => {
     if (volumeIcon.classList.contains('fa-volume-mute')) {
-        volumeIcon.classList.replace('fa-volume-mute','fa-volume-up');
         video.volume = volumeLevel;
+        changeVolumeIcon(video.volume);
         console.log(volumeLevel);
         volumeBar.style.width = `${volumeLevel*100}%`;
     } else {
-        volumeIcon.classList.replace('fa-volume-up','fa-volume-mute');
+        volumeIcon.className = '';
+        volumeIcon.classList.add('fas', 'fa-volume-mute');
         video.volume = 0;
         volumeBar.style.width = '0%';
     }
@@ -96,11 +113,45 @@ const toggleMute = () => {
 
 
 // Change Playback Speed -------------------- //
-
-
+const changeSpeed = (e) => {
+    video.playbackRate = speed.value;
+}
 
 // Fullscreen ------------------------------- //
+/* View in fullscreen */
+function openFullscreen(elem) {
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+      elem.msRequestFullscreen();
+    }
+    video.classList.add('video-fullscreen');
+  }
+  
+/* Close fullscreen */
+function closeFullscreen() {
+if (document.exitFullscreen) {
+    document.exitFullscreen();
+} else if (document.webkitExitFullscreen) { /* Safari */
+    document.webkitExitFullscreen();
+} else if (document.msExitFullscreen) { /* IE11 */
+    document.msExitFullscreen();
+}
+video.classList.remove('video-fullscreen');
 
+};
+
+let fullscreen = false
+function toggleFullscreen() {
+    if (!fullscreen) {
+        openFullscreen(player);
+    } else {
+        closeFullscreen();
+    }
+    fullscreen = !fullscreen;
+}
 
 // Event listeners
 video.addEventListener('click', togglePlay);
@@ -110,3 +161,5 @@ video.addEventListener('canplay', updateProgress);
 progressRange.addEventListener('click', setProgress);
 volumeRange.addEventListener('click', setVolume);
 volumeIcon.addEventListener('click', toggleMute);
+speed.addEventListener('change', changeSpeed);
+fullscreenBtn.addEventListener('click', toggleFullscreen)
